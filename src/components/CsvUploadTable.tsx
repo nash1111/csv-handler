@@ -3,7 +3,7 @@ import Papa from "papaparse";
 import { ColumnDef } from "@tanstack/react-table";
 import { DataTable } from "./DataTable";
 import { Button } from "@/components/ui/button";
-import { Download } from "lucide-react";
+import { Download, Plus } from "lucide-react";
 
 type CsvRow = { [key: string]: any };
 
@@ -16,6 +16,7 @@ export default function CsvUploadTable({ apiKey }: Props) {
   const [columns, setColumns] = React.useState<ColumnDef<CsvRow, any>[]>([]);
   const [firstColumn, setFirstColumn] = React.useState("");
   const [secondColumn, setSecondColumn] = React.useState("");
+  const [newColumnName, setNewColumnName] = React.useState("");
 
   const handleFileUpload: React.ChangeEventHandler<HTMLInputElement> = (e) => {
     const file = e.target.files?.[0];
@@ -40,6 +41,25 @@ export default function CsvUploadTable({ apiKey }: Props) {
     });
   };
 
+  const addNewColumn = () => {
+    if (!newColumnName.trim()) return;
+
+    const updatedColumns = [
+      ...columns,
+      {
+        id: newColumnName,
+        accessorFn: (row) => row[newColumnName],
+        header: newColumnName,
+      },
+    ];
+
+    const updatedData = data.map((row) => ({ ...row, [newColumnName]: "" }));
+
+    setColumns(updatedColumns);
+    setData(updatedData);
+    setNewColumnName("");
+  };
+
   const analyzeSentiment = async () => {
     if (!firstColumn || !secondColumn) {
       alert("Please select two columns.");
@@ -47,12 +67,9 @@ export default function CsvUploadTable({ apiKey }: Props) {
     }
 
     const updatedData = [...data];
-    const totalRows = data.length;
 
-    for (let i = 0; i < totalRows; i++) {
-      const row = data[i];
-      const text = row[firstColumn];
-
+    for (let i = 0; i < data.length; i++) {
+      const text = data[i][firstColumn];
       if (!text || typeof text !== "string" || !text.trim()) {
         updatedData[i][secondColumn] = "";
         continue;
@@ -64,33 +81,21 @@ export default function CsvUploadTable({ apiKey }: Props) {
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              document: { type: "PLAIN_TEXT", content: text }
-            }),
+            body: JSON.stringify({ document: { type: "PLAIN_TEXT", content: text } }),
           }
         );
-        const result = await response.json();
 
-        if (!response.ok) {
-          console.error("API Error details:", result);
-          updatedData[i][secondColumn] = "error";
-        } else {
-          const sentimentScore = result.documentSentiment.score;
-          updatedData[i][secondColumn] = sentimentScore;
-        }
-      } catch (error) {
-        console.error("Fetch error:", error);
+        const result = await response.json();
+        updatedData[i][secondColumn] = response.ok ? result.documentSentiment.score : "error";
+      } catch {
         updatedData[i][secondColumn] = "error";
       }
 
-      console.log(`Processed ${i + 1} of ${totalRows} rows.`);
-
-      await new Promise((resolve) => setTimeout(resolve, 100));
+      await new Promise((r) => setTimeout(r, 100));
     }
 
     setData(updatedData);
   };
-
 
   const handleDownload = () => {
     const csv = Papa.unparse(data);
@@ -107,43 +112,38 @@ export default function CsvUploadTable({ apiKey }: Props) {
 
   return (
     <div>
-      <input
-        type="file"
-        accept=".csv,text/csv"
-        onChange={handleFileUpload}
-        className="mb-4"
-      />
+      <input type="file" accept=".csv,text/csv" onChange={handleFileUpload} className="mb-4" />
 
       {data.length > 0 && (
         <>
           <div className="flex gap-2 items-center mb-4">
-            <select
-              value={firstColumn}
-              onChange={(e) => setFirstColumn(e.target.value)}
-              className="border px-2 py-1 rounded"
-            >
+            <select value={firstColumn} onChange={(e) => setFirstColumn(e.target.value)} className="border px-2 py-1 rounded">
               <option value="">Select text column</option>
               {columns.map((col) => (
-                <option key={col.id} value={col.id}>
-                  {col.id}
-                </option>
+                <option key={col.id} value={col.id}>{col.id}</option>
               ))}
             </select>
 
-            <select
-              value={secondColumn}
-              onChange={(e) => setSecondColumn(e.target.value)}
-              className="border px-2 py-1 rounded"
-            >
+            <select value={secondColumn} onChange={(e) => setSecondColumn(e.target.value)} className="border px-2 py-1 rounded">
               <option value="">Select target column</option>
               {columns.map((col) => (
-                <option key={col.id} value={col.id}>
-                  {col.id}
-                </option>
+                <option key={col.id} value={col.id}>{col.id}</option>
               ))}
             </select>
 
             <Button onClick={analyzeSentiment}>Run Sentiment Analysis</Button>
+
+            <input
+              type="text"
+              placeholder="New column name"
+              value={newColumnName}
+              onChange={(e) => setNewColumnName(e.target.value)}
+              className="border px-2 py-1 rounded"
+            />
+
+            <Button onClick={addNewColumn} variant="outline">
+              <Plus className="mr-2 h-4 w-4" /> Add Column
+            </Button>
 
             <Button onClick={handleDownload} variant="outline">
               <Download className="mr-2 h-4 w-4" /> Download CSV
