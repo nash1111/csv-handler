@@ -41,7 +41,7 @@ function App() {
           <div className="mb-4 text-green-700">
             api key saved ✅
           </div>
-          <CsvUploadTable />
+          <CsvUploadTable apiKey={savedApiKey}/>
         </>
       )}
     </div>
