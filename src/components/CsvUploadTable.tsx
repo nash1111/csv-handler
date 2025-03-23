@@ -48,7 +48,7 @@ export default function CsvUploadTable({ apiKey }: Props) {
       ...columns,
       {
         id: newColumnName,
-        accessorFn: (row) => row[newColumnName],
+        accessorFn: (row: { [x: string]: any; }) => row[newColumnName],
         header: newColumnName,
       },
     ];
