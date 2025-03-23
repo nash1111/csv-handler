@@ -1,54 +1,44 @@
-# React + TypeScript + Vite
+# csv-handler
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+![demo](https://github.com/nash1111/csv-handler/blob/master/csv-handler.gif)
 
-Currently, two official plugins are available:
+## Overview
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+csv-handler is a web application that allows you to easily manipulate CSV files and perform sentiment analysis on text data.
 
-## Expanding the ESLint configuration
+Main features:
+- Upload and display CSV files
+- Perform sentiment analysis on text data using Google Cloud Natural Language API
+- Add new columns
+- Download processed data as CSV
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## Requirements
 
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
-```
+To use this application, you need a **Google Cloud Natural Language API** key.
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### How to obtain a Google Cloud Natural Language API key
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+1. Go to the [Google Cloud Console](https://console.cloud.google.com/) and log in to your account
+2. Create or select a project
+3. Navigate to "APIs & Services" > "Library"
+4. Search for "Cloud Natural Language API" and enable it
+5. Go to "APIs & Services" > "Credentials"
+6. Click "Create Credentials" > "API key"
+7. Copy the created API key (for security, it's recommended to set restrictions on your API key)
 
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    'react-x': reactX,
-    'react-dom': reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs['recommended-typescript'].rules,
-    ...reactDom.configs.recommended.rules,
-  },
-})
-```
+## How to use
+
+1. Launch the application
+2. Enter your Google Cloud Natural Language API key and click the "save api key" button
+3. Upload a CSV file
+4. Select the column containing text you want to analyze ("Select text column") and the column where you want to store the results ("Select target column")
+5. Click the "Run Sentiment Analysis" button to perform sentiment analysis
+6. Add new columns as needed
+7. Click the "Download CSV" button to download the processed data
+
+## About Sentiment Analysis Scores
+
+Sentiment analysis scores range from -1.0 to 1.0:
+- Negative values (closer to -1.0): Negative sentiment
+- Values close to 0: Neutral sentiment
+- Positive values (closer to 1.0): Positive sentiment
